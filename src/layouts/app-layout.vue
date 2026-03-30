@@ -2,7 +2,7 @@
     <!--  BEGIN MAIN CONTAINER  -->
     <div class="relative">
         <!-- sidebar menu overlay -->
-        <div class="fixed inset-0 bg-[black]/60 z-50 lg:hidden" :class="{ hidden: !store.sidebar }" @click="store.toggleSidebar()"></div>
+        <div class="fixed inset-0 bg-[black]/60 z-[49] lg:hidden" :class="{ hidden: !store.sidebar }" @click="store.toggleSidebar()"></div>
 
         <!-- screen loader -->
         <div

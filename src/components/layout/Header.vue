@@ -28,10 +28,10 @@
                                 />
                             </a>
                         </li>
-
+                        
                         <!-- GITHUB -->
                         <li>
-                            <ahttps://fearandhunger.fandom.com/wiki/Items_List#Weapons
+                            <a
                                 href="https://github.com/BreinerBravo"
                                 target="_blank"
                                 class="block rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60"
@@ -62,7 +62,7 @@
                             <a
                                 href="/assets/images/document/_CV - English V .pdf"
                                 download="Breiner-Bravo-CV.pdf"
-                                class="flex gap-2 p-2 px-3 rounded-full font-bold bg-white-light/40 dark:bg-dark/40 hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60"
+                                class="flex gap-2 p-2 px-3 rounded-full font-bold bg-primary dark:bg-primary-dark-light hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60"
                             >
                                 <IconMenuCv class="w-5 h-5"/>
                                 
@@ -144,7 +144,7 @@
             </div>
 
             <!-- horizontal menu -->
-           <HorizontalMenu />
+           <HorizontalBar />
         </div>
     </header>
 </template>
@@ -166,6 +166,7 @@
     import IconMenuEmail from '../icon/menu/icon-menu-email.vue';
     import IconMenuLinkedIn from '../icon/menu/icon-menu-linked-in.vue';
     import IconMenuCv from '../icon/menu/icon-menu-cv.vue';
+import HorizontalBar from './HorizontalBar.vue';
 
     const store = useAppStore();
     const route = useRoute();
