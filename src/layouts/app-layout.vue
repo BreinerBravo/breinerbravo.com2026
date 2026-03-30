@@ -51,18 +51,18 @@
         <Setting />
         <!-- END APP SETTING LAUNCHER -->
 
-        <div class="main-container text-black dark:text-white-dark h-screen overflow-hidden" :class="[store.navbar]">
+        <div class="main-container text-black dark:text-white-dark h-screen" :class="[store.navbar]">
             <!--  BEGIN SIDEBAR  -->
             <Sidebar />
             <!--  END SIDEBAR  -->
 
-            <div class="main-content flex h-screen min-h-0 flex-col overflow-hidden">
+            <div class="main-content flex h-screen min-h-0 flex-col">
                 <!--  BEGIN TOP NAVBAR  -->
                 <Header />
                 <!--  END TOP NAVBAR  -->
 
                 <!--  BEGIN CONTENT AREA  -->
-                <div class="animation flex-1 min-h-0 overflow-hidden p-6">
+                <div class="animation flex-1 min-h-0 p-6">
                     <router-view></router-view>
                 </div>
                 <!--  END CONTENT AREA  -->
