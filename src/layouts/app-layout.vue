@@ -68,7 +68,7 @@
                 <!--  END CONTENT AREA  -->
 
                 <!-- BEGIN FOOTER -->
-                <Footer />
+                <!-- <Footer /> -->
                 <!-- END FOOTER -->
             </div>
         </div>
