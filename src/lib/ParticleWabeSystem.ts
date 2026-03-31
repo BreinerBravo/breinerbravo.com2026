@@ -29,6 +29,9 @@ export class ParticleWaveSystem {
         vy: 0
     };
 
+    private pointerDelay = 0.04; // menor = más delay
+    private pointerFriction = 0.3;
+    
     private particleSpacing = 42;
 
     constructor(canvasRef: Ref<HTMLCanvasElement | null>) {
@@ -113,8 +116,11 @@ export class ParticleWaveSystem {
 
         }
 
-        this.pointer.x = this.width * 0.5;
-        this.pointer.y = this.height * 0.5;
+        this.pointer.x +=
+        (this.pointer.tx - this.pointer.x) * this.pointerDelay;
+
+        this.pointer.y +=
+        (this.pointer.ty - this.pointer.y) * this.pointerDelay;
 
         this.pointer.tx = this.width * 0.5;
         this.pointer.ty = this.height * 0.5;
@@ -129,17 +135,20 @@ export class ParticleWaveSystem {
         const prevX = this.pointer.x;
         const prevY = this.pointer.y;
 
-        this.pointer.x +=
-            (this.pointer.tx - this.pointer.x) * 0.08;
+        
+this.pointer.vx +=
+(this.pointer.tx - this.pointer.x) *
+this.pointerDelay;
 
-        this.pointer.y +=
-            (this.pointer.ty - this.pointer.y) * 0.08;
+this.pointer.vy +=
+(this.pointer.ty - this.pointer.y) *
+this.pointerDelay;
 
-        this.pointer.vx =
-            this.pointer.x - prevX;
+this.pointer.vx *= this.pointerFriction;
+this.pointer.vy *= this.pointerFriction;
 
-        this.pointer.vy =
-            this.pointer.y - prevY;
+this.pointer.x += this.pointer.vx;
+this.pointer.y += this.pointer.vy;
 
         const velocity =
             Math.hypot(
