@@ -75,6 +75,7 @@ export class ParticleWaveSystem {
         const positions = new Float32Array(total * 3);
         const uv = new Float32Array(total * 2);
         const lag = new Float32Array(total);
+        const randomAttr = new Float32Array(total);
 
         const halfX = ((gridX - 1) * spacing) * 0.5;
         const halfY = ((gridY - 1) * spacing) * 0.5;
@@ -84,8 +85,16 @@ export class ParticleWaveSystem {
 
         for (let y = 0; y < gridY; y++) {
             for (let x = 0; x < gridX; x++) {
-                const px = x * spacing - halfX;
-                const py = y * spacing - halfY;
+                const i = y * gridX + x;
+                const randomA = Math.random();
+                const randomB = Math.random();
+                const randomC = Math.random();
+
+                let px = x * spacing - halfX;
+                let py = y * spacing - halfY;
+
+                px += (randomA - 0.5) * spacing * 0.7;
+                py += (randomB - 0.5) * spacing * 0.7;
 
                 positions[p++] = px;
                 positions[p++] = py;
@@ -96,7 +105,8 @@ export class ParticleWaveSystem {
 
                 const normX = (x / (gridX - 1)) * 2 - 1;
                 const normY = (y / (gridY - 1)) * 2 - 1;
-                lag[y * gridX + x] = Math.sqrt(normX * normX + normY * normY);
+                lag[i] = Math.sqrt(normX * normX + normY * normY);
+                randomAttr[i] = randomC;
             }
         }
 
@@ -104,6 +114,7 @@ export class ParticleWaveSystem {
         this.geometry.setAttribute('position', new this.THREE.Float32BufferAttribute(positions, 3));
         this.geometry.setAttribute('aUv', new this.THREE.Float32BufferAttribute(uv, 2));
         this.geometry.setAttribute('aLag', new this.THREE.Float32BufferAttribute(lag, 1));
+        this.geometry.setAttribute('aRandom', new this.THREE.Float32BufferAttribute(randomAttr, 1));
     }
 
     private setupShader() {
@@ -119,11 +130,13 @@ export class ParticleWaveSystem {
                 uMouseStrength: { value: this.options.mouseStrength },
                 uRadius: { value: this.options.radius },
                 uOpacityStrength: { value: this.options.opacityStrength },
-                uPointSize: { value: 2.1 },
+                uPointSize: { value: 2.4 },
             },
             vertexShader: `
                 attribute vec2 aUv;
                 attribute float aLag;
+                attribute float aRandom;
+
                 uniform float uTime;
                 uniform vec2 uMouse;
                 uniform vec2 uResolution;
@@ -132,56 +145,59 @@ export class ParticleWaveSystem {
                 uniform float uRadius;
                 uniform float uOpacityStrength;
                 uniform float uPointSize;
+
                 varying float vOpacity;
                 varying float vHeight;
-                float hash(vec2 p) {
-                    p = fract(p * vec2(123.34, 345.45));
-                    p += dot(p, p + 34.345);
-                    return fract(p.x * p.y);
-                }
-                float noise(vec2 p) {
-                    vec2 i = floor(p);
-                    vec2 f = fract(p);
-                    float a = hash(i);
-                    float b = hash(i + vec2(1.0, 0.0));
-                    float c = hash(i + vec2(0.0, 1.0));
-                    float d = hash(i + vec2(1.0, 1.0));
-                    vec2 u = f * f * (3.0 - 2.0 * f);
-                    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-                }
+
                 void main() {
                     vec3 pos = position;
-                    float delayedTime = uTime - aLag * 1.4;
-                    float wave = sin(pos.x * 1.2 + delayedTime * 0.88);
-                    wave += sin(pos.y * 1.35 + delayedTime * 0.56);
-                    wave *= 0.5;
-                    float breathe = sin(delayedTime * 0.17) * 0.15;
-                    float softNoise = (noise(aUv * 6.0 + delayedTime * 0.12) - 0.5) * 0.35;
-                    vec2 toMouse = uMouse - pos.xy;
+                    float delayedTime = uTime - aLag * 0.55;
+
+                    vec2 toMouse = pos.xy - uMouse;
                     float dist = length(toMouse);
-                    float influence = smoothstep(uRadius, 0.0, dist);
+                    float mouseMask = smoothstep(uRadius, 0.0, dist);
+
+                    float ripple = sin(dist * 4.0 - delayedTime * 3.0);
+                    float height = ripple * mouseMask * uWaveAmplitude;
+
                     vec2 dir = normalize(toMouse + vec2(0.0001));
-                    float flow = dot(dir, vec2(0.707, 0.707)) * influence * uMouseStrength;
-                    float height = (wave + breathe + softNoise + flow) * uWaveAmplitude;
+                    height += dot(dir, vec2(0.7, 0.7)) * mouseMask * uMouseStrength;
+
+                    float localNoise = sin((dist * 3.5 + aRandom * 9.0) - delayedTime * (1.5 + aRandom * 0.35));
+                    height += localNoise * mouseMask * 0.04;
+
                     pos.z += height;
-                    vOpacity = smoothstep(-uWaveAmplitude * 0.75, uWaveAmplitude * 0.85, height) * uOpacityStrength;
+                    pos.xy += dir * (height * 0.05 * mouseMask);
+
+                    float life = smoothstep(uRadius * 0.9, uRadius * 0.2, dist);
+                    vOpacity = mouseMask * smoothstep(-0.2, 0.4, height) * life * uOpacityStrength;
                     vHeight = height;
+
                     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
                     gl_Position = projectionMatrix * mvPosition;
-                    gl_PointSize = uPointSize * (min(uResolution.x, uResolution.y) / 900.0);
+
+                    float sizeFade = smoothstep(uRadius, 0.0, dist);
+                    gl_PointSize = uPointSize * sizeFade * (min(uResolution.x, uResolution.y) / 900.0);
                 }
             `,
             fragmentShader: `
                 varying float vOpacity;
                 varying float vHeight;
+
                 void main() {
                     vec2 centered = gl_PointCoord - vec2(0.5);
-                    float dist = length(centered);
-                    float mask = smoothstep(0.5, 0.0, dist);
-                    float glow = smoothstep(0.48, 0.12, dist);
-                    vec3 color = mix(vec3(0.20, 0.44, 0.92), vec3(0.68, 0.88, 1.0), clamp(vHeight * 2.4 + 0.5, 0.0, 1.0));
-                    float alpha = mask * vOpacity * (0.45 + glow * 0.55);
+                    float distToCenter = length(centered);
+                    float glow = smoothstep(0.5, 0.05, distToCenter);
+
+                    vec3 color = mix(
+                        vec3(0.25, 0.45, 0.95),
+                        vec3(0.65, 0.85, 1.0),
+                        clamp(vHeight * 0.5 + 0.5, 0.0, 1.0)
+                    );
+
+                    float alpha = vOpacity * glow;
                     if (alpha < 0.01) discard;
+
                     gl_FragColor = vec4(color, alpha);
                 }
             `,
@@ -193,8 +209,8 @@ export class ParticleWaveSystem {
 
     update = () => {
         const elapsed = this.clock.getElapsedTime();
-        this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.05;
-        this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.05;
+        this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.08;
+        this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.08;
         this.material.uniforms.uTime.value = elapsed;
         this.material.uniforms.uMouse.value.copy(this.mouse);
         this.renderer.render(this.scene, this.camera);
