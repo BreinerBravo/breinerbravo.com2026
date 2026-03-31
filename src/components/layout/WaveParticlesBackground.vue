@@ -90,6 +90,9 @@
         ctx.fillRect(0, 0, width, height);
 
         const seconds = time * 0.001;
+
+
+
         const centerX = width * 0.5;
         const centerY = height * 0.5;
 
@@ -97,6 +100,23 @@
             const fromMouseX = particle.x - pointer.x;
             const fromMouseY = particle.y - pointer.y;
             const distMouse = Math.hypot(fromMouseX, fromMouseY) + 0.0001;
+
+            const angle = Math.atan2(fromMouseY, fromMouseX);
+
+
+            
+        const oceanWave =
+    Math.sin(particle.x * 0.012 + seconds * 0.6) +
+    Math.sin(particle.y * 0.015 - seconds * 0.4);
+
+const oceanForce = oceanWave * 6;
+
+
+const angularNoise =
+    Math.sin(angle * 3 + seconds * 0.8) * 0.35 +
+    Math.sin(angle * 7 - seconds * 0.5) * 0.25;
+
+
 const centerVoid = Math.exp(-distMouse * 0.007);
             const nxMouse = fromMouseX / distMouse;
             const nyMouse = fromMouseY / distMouse;
@@ -109,15 +129,27 @@ const repelRadius = 920; // radio del campo
 const ringRadius = 240; // radio del anillo
 const ringWidth = 65;   // grosor del anillo
 
-const ringFalloff = Math.exp(
-    -Math.pow(distMouse - ringRadius, 2) /
+const breathing =
+    Math.sin(seconds * 1.4) * 18;
+
+const ringRadiusAnimated =
+    ringRadius + breathing;
+
+const distortedRingRadius = ringRadiusAnimated + angularNoise * 90;
+
+  const ringFalloff = Math.exp(
+    -Math.pow(distMouse - distortedRingRadius, 2) /
     (ringWidth * ringWidth)
 );
 const repelFalloff = Math.exp(-(distMouse * distMouse) / (repelRadius * repelRadius));
 
+const turbulence =
+    Math.sin(distMouse * 0.04 - seconds * 2) * 0.6;
+
 const mousePush =
     waveFront * mouseFalloff +
-    repelStrength * ringFalloff;
+    repelStrength * ringFalloff *
+    (1 + turbulence);
 
     
             const fromCenterX = particle.x - centerX;
@@ -127,9 +159,23 @@ const mousePush =
             const nyCenter = fromCenterY / distCenter;
 
             const centerWave = Math.sin(distCenter * 0.024 - seconds * 1.2 + particle.phase) * 2.4;
+const flowX =
+    Math.sin(particle.y * 0.01 + seconds * 0.7) * 4;
 
-            const offsetX = nxMouse * mousePush + nxCenter * centerWave;
-            const offsetY = nyMouse * mousePush + nyCenter * centerWave;
+const flowY =
+    Math.cos(particle.x * 0.01 - seconds * 0.6) * 4;
+
+const offsetX =
+    nxMouse * mousePush +
+    nxCenter * centerWave +
+    flowX +
+    oceanForce;
+
+const offsetY =
+    nyMouse * mousePush +
+    nyCenter * centerWave +
+    flowY +
+    oceanForce;
 
             const screenX = particle.x + offsetX;
             const screenY = particle.y + offsetY;
