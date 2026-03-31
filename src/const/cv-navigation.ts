@@ -3,9 +3,9 @@ import type { NavItem } from '@/types/navigation'
 export const getCvNav = (): NavItem[] => [
     {
         type: 'link',
-        title: 'Inicio',
+        title: 'home',
         icon: 'icon-menu-widget',
-        to: '/dashboard/admin',
+        to: '/',
     },
 
 
