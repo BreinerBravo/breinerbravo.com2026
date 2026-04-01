@@ -1,6 +1,8 @@
 <template>
   <div
     class="
+    flex flex-col
+    align-middle
         card-glass
         h-full p-4 rounded-3xl justify-center text-white "
   >
@@ -32,14 +34,14 @@
             </div>
 
             <h1
-              class="text-4xl font-bold italic bg-gradient-to-r from-black dark:from-white to-purple-500 dark:to-purple-300 bg-clip-text text-transparent"
+              class="text-4xl font-bold italic bg-gradient-to-r from-gray-800 dark:from-white to-yellow-500 dark:to-yellow-600 bg-clip-text text-transparent"
             >
               Breiner Bravo
             </h1>
 
             <p class="text-lg text-gray-600 dark:text-gray-300 mt-2">
               I'm a fullStack
-              <span class="text-purple-400 dark:text-purple-300  font-semibold">
+              <span class="text-yellow-600 dark:text-yellow-600  font-semibold">
                 Developer!!!
               </span>
             </p>
@@ -105,7 +107,7 @@ rgba(25,25,30,0.75),
 rgba(10,10,15,0.65)
 );
 
-backdrop-filter: blur(25px);
+backdrop-filter: blur(3px);
 -webkit-backdrop-filter: blur(25px);
 
 border:1px solid rgba(212,175,55,0.25);
@@ -126,8 +128,8 @@ background:
 /* marble veins */
 linear-gradient(
 120deg,
-rgba(255,255,255,0.95),
-rgba(248,248,250,0.9)
+rgba(255,255,255,0.75),
+rgba(248,248,250,0.2)
 ),
 
 repeating-linear-gradient(
@@ -145,9 +147,9 @@ transparent 4px,
 rgba(0,0,0,0.015) 7px
 );
 
-backdrop-filter: blur(18px);
+backdrop-filter: blur(3px);
 
-border:1px solid rgba(0,0,0,0.08);
+border:2px solid rgba(212,175,55,0.25);
 
 box-shadow:
 
