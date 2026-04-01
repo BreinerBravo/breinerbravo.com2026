@@ -6,9 +6,24 @@ type Particle = {
     radius: number;
     phase: number;
     depth: number;
+    ringInfluence:number;
+    renderRadius:number;
 };
 
 export class ParticleWaveSystem {
+
+    private isDark = true;
+
+private colors = {
+dark:{
+background:'#050507',
+particle:'rgba(212,175,55,'
+},
+light:{
+background:'#f7f8fc',
+particle:'rgba(184,134,11,'
+}
+};
 
     private canvasRef: Ref<HTMLCanvasElement | null>;
 
@@ -72,6 +87,11 @@ export class ParticleWaveSystem {
 
                     depth:
                         Math.random() * 0.45 + 0.65,
+
+                    ringInfluence:0,
+
+                    renderRadius:1
+
                 });
 
             }
@@ -101,7 +121,9 @@ export class ParticleWaveSystem {
             `${this.height}px`;
 
         this.ctx =
-            this.canvasRef.value.getContext('2d');
+this.canvasRef.value.getContext('2d',{
+alpha:true
+});
 
         if (this.ctx) {
 
@@ -128,6 +150,14 @@ export class ParticleWaveSystem {
         this.buildParticles();
     };
 
+    private detectTheme = ()=>{
+
+this.isDark =
+document.documentElement.classList.contains('dark');
+
+};
+private smoothVelocity = 0;
+
     private draw = (time:number)=>{
 
         if (!this.ctx) return;
@@ -150,27 +180,27 @@ this.pointer.vy *= this.pointerFriction;
 this.pointer.x += this.pointer.vx;
 this.pointer.y += this.pointer.vy;
 
+
         const velocity =
             Math.hypot(
                 this.pointer.vx,
                 this.pointer.vy
             );
 
+    
+this.smoothVelocity +=
+(velocity - this.smoothVelocity)*0.12;
+
         this.ctx.clearRect(
-            0,
-            0,
-            this.width,
-            this.height
-        );
+0,
+0,
+this.width,
+this.height
+);
 
-        this.ctx.fillStyle='#01030b';
+        
 
-        this.ctx.fillRect(
-            0,
-            0,
-            this.width,
-            this.height
-        );
+        
 
         const seconds = time * 0.001;
 
@@ -258,10 +288,7 @@ this.pointer.y += this.pointer.vy;
                 65+
                 velocitySmooth*40;
 
-            const breathing =
-                Math.sin(
-                    seconds*1.4
-                )*18;
+            const breathing = Math.sin(seconds*0.9)*10;
 
             const ringRadiusAnimated =
                 ringRadius+breathing;
@@ -276,25 +303,34 @@ this.pointer.y += this.pointer.vy;
                 Math.cos(
                     angle-velocityAngle
                 );
+                
 
             const velocityStretch =
                 velocity*18;
 
             const distortedRingRadius =
                 ringRadiusAnimated+
-                angularNoise*70+
+                angularNoise*28+
                 directionalStretch*
                 velocityStretch;
 
-            const ringFalloff =
+            const targetRing =
                 Math.exp(
-                    -Math.pow(
-                        distMouse-
-                        distortedRingRadius,
-                        2
-                    )/
-                    (ringWidth*ringWidth)
+                -Math.pow(
+                distMouse-
+                distortedRingRadius,
+                2
+                )/
+                (ringWidth*ringWidth)
                 );
+
+                particle.ringInfluence +=
+                (targetRing - particle.ringInfluence)*0.08;
+
+                
+
+                const ringFalloff =
+                particle.ringInfluence;
 
             const turbulence =
                 Math.sin(
@@ -398,12 +434,13 @@ this.pointer.y += this.pointer.vy;
 
             const radius =
                 Math.max(
-                    1.5,
+                    1,
                     particle.radius*
                     (1-farFade)+
                     depthBoost*0.55+
                     ringBoost-
                     centerVoid*8
+
                 );
 
             const alpha =
@@ -417,10 +454,45 @@ this.pointer.y += this.pointer.vy;
                     )
                 );
 
+                particle.renderRadius +=
+(radius - particle.renderRadius)*0.15;
+
+const finalRadius =
+particle.renderRadius;
+
+
             this.ctx.beginPath();
 
-            this.ctx.fillStyle =
-                `rgba(98,146,255,${alpha})`;
+            const gold =
+this.isDark
+? `rgba(212,175,55,${alpha})`
+: `rgba(184,134,11,${alpha})`;
+
+const goldBase =
+this.isDark
+? 212
+: 184;
+
+
+const goldShift =
+Math.sin(seconds*1.8 + particle.phase)*10;
+
+const r =
+(this.isDark ? 212 : 196) +
+goldShift;
+
+const g =
+(this.isDark ? 170 : 150) +
+goldShift*0.35;
+
+const b =
+(this.isDark ? 60 : 40) +
+goldShift*0.15;
+const sparkle =
+Math.sin(seconds*4 + particle.phase)*0.15;
+
+this.ctx.fillStyle =
+`rgba(${r},${g},${b},${alpha + sparkle})`;
 
             const angleToMouse =
                 Math.atan2(
@@ -428,17 +500,25 @@ this.pointer.y += this.pointer.vy;
                     this.pointer.x-screenX
                 );
 
+                this.ctx.shadowBlur = 10;
+
+this.ctx.shadowColor =
+this.isDark
+? 'rgba(212,175,55,0.5)'
+: 'rgba(196,150,40,0.35)';
+
             this.ctx.ellipse(
-                screenX,
-                screenY,
-                radius,
-                radius*0.48,
-                angleToMouse,
-                0,
-                Math.PI*2
+            screenX,
+            screenY,
+            finalRadius,
+            finalRadius*0.48,
+            angleToMouse,
+            0,
+            Math.PI*2
             );
 
             this.ctx.fill();
+            this.ctx.shadowBlur = 0;
         }
 
         this.animationFrameId =
@@ -467,6 +547,17 @@ this.pointer.y += this.pointer.vy;
 
     start(){
 
+        this.detectTheme();
+
+const observer =
+new MutationObserver(
+this.detectTheme
+);
+
+observer.observe(
+document.documentElement,
+{attributes:true}
+);
         this.resizeCanvas();
 
         window.addEventListener(

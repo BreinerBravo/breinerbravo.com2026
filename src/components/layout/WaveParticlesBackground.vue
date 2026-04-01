@@ -38,6 +38,7 @@ system.destroy();
 
 position: fixed;
 inset:0;
+background:transparent !important;
 
 z-index:0;
 

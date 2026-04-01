@@ -1,6 +1,6 @@
 <template>
     <!--  BEGIN MAIN CONTAINER  -->
-    <div class="relative min-h-screen overflow-hidden bg-[#01030b]">
+    <div class="relative min-h-screen overflow-hidden">
         <WaveParticlesBackground />
         <!-- sidebar menu overlay -->
         <div class="fixed inset-0 bg-[black]/60 z-[49] lg:hidden" :class="{ hidden: !store.sidebar }" @click="store.toggleSidebar()"></div>
