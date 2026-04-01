@@ -1,6 +1,7 @@
 <template>
     <!--  BEGIN MAIN CONTAINER  -->
-    <div class="relative">
+    <div class="relative min-h-screen overflow-hidden">
+        <WaveParticlesBackground />
         <!-- sidebar menu overlay -->
         <div class="fixed inset-0 bg-[black]/60 z-[49] lg:hidden" :class="{ hidden: !store.sidebar }" @click="store.toggleSidebar()"></div>
 
@@ -51,7 +52,7 @@
         <Setting />
         <!-- END APP SETTING LAUNCHER -->
 
-        <div class="main-container text-black dark:text-white-dark h-screen" :class="[store.navbar]">
+        <div class="main-container relative z-10 text-black dark:text-white-dark min-h-screen" :class="[store.navbar]">
             <!--  BEGIN SIDEBAR  -->
             <Sidebar />
             <!--  END SIDEBAR  -->
@@ -81,6 +82,7 @@
     import Footer from '@/components/layout/Footer.vue';
     import Setting from '@/components/ThemeCustomizer.vue';
     import appSetting from '@/app-setting';
+    import WaveParticlesBackground from '@/components/layout/WaveParticlesBackground.vue';
 
     import { useAppStore } from '@/stores/index';
     const store = useAppStore();
