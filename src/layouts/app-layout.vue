@@ -57,13 +57,13 @@
             <Sidebar />
             <!--  END SIDEBAR  -->
 
-            <div class="main-content flex flex-col min-h-screen">
+            <div class="main-content flex h-screen min-h-0 flex-col">
                 <!--  BEGIN TOP NAVBAR  -->
                 <Header />
                 <!--  END TOP NAVBAR  -->
 
                 <!--  BEGIN CONTENT AREA  -->
-                <div class="p-6 animation">
+                <div class="animation flex-1 min-h-0 p-6">
                     <router-view></router-view>
                 </div>
                 <!--  END CONTENT AREA  -->
